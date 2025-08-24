@@ -8,8 +8,9 @@ mileage_from = data.get("mileage_from")
 mileage_to = data.get("mileage_to")
 fuel_types = data.get("fuel_types")
 
+#ik this probably could be done better but that's for later
 if (mileage_to is None):
-    print("[!] No max Mileage filter set for pointing, assuming max for 350000, change it for your use case (NOTE FOR DEFAULT MILEAGE: It will still Rank cars with higher mileage, but anything past 350000 will have 0 points)")
+    print("[!] No max Mileage filter set for pointing, assuming max for 350000, change it for your use case (NOTE FOR DEFAULT MILEAGE: It will still Rank cars with higher mileage, but anything past 350000 will have 0 points for mileage)")
     mileage_to = 350000
 if (year_to is None):
     print("[!] No max Year filter set for pointing, assuming max for 2025, change it for your use case")
@@ -34,16 +35,16 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
     points = 0
 
     # mileage pointing
-    max_mileage = mileage_to
+    max_mileage = int(str(mileage_to).replace(" ", "").replace("km", "").replace("‎", ""))
+    min_mileage = int(str(mileage_from).replace(" ", "").replace("km", "").replace("‎", ""))
     try:
-        mileage_val = int(str(mileage).capitalize().replace(" ", "").replace("km", "").replace("‎", ""))
-        if mileage_val <= 0:
-            mileage_score = 0
-        elif mileage_val >= max_mileage:
+        mileage_val = int(str(mileage).replace(" ", "").replace("km", "").replace("‎", ""))
+        if mileage_val < min_mileage or mileage_val > max_mileage:
             mileage_score = 0
         else:
-            mileage_score = max(0, 90 - int((mileage_val / max_mileage) * 90))
-    except Exception:
+            mileage_score = max(0, int(((max_mileage - mileage_val) / (max_mileage - min_mileage)) * 85))
+    except Exception as e:
+        print(f"[!] Exception Occurred: {e}")
         mileage_score = 0
 
     points += mileage_score
@@ -53,13 +54,13 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
     max_price = int(str(price_to).replace(" ", "").replace("zł", "").replace("‎", ""))
     min_price = int(str(price_from).replace(" ", "").replace("zł", "").replace("‎", ""))
     try:
-        price_val = int(str(price).capitalize().replace(" ", "").replace("zł", "").replace("‎", ""))
+        price_val = int(str(price).replace(" ", "").replace("zł", "").replace("‎", ""))
         if price_val <= min_price:
-            price_score = 120
+            price_score = 100
         elif price_val >= max_price:
             price_score = 0
         else:
-            price_score = max(0, int(((max_price - price_val) / (max_price - min_price)) * 120))
+            price_score = max(0, int(((max_price - price_val) / (max_price - min_price)) * 110))
     except Exception as e:
         print(f"[!] Exception Occurred: {e}")
         price_score = 0
@@ -74,26 +75,27 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
     elif (fuel_type == "LPG"):
         points += 5
 
-    if (gearbox == "Manual"):
+    if (gearbox == "Manualna"):
         points += 5
-    elif (gearbox == "Automatic"):
+    elif (gearbox == "Automatyczna"):
         points += 2
 
-    max_year = year_to
-    min_year = year_from
+    max_year = int(str(year_to).replace(" ", "").replace("r.", "").replace("‎", ""))
+    min_year = int(str(year_from).replace(" ", "").replace("r.", "").replace("‎", ""))
     try:
-        year_val = int(str(year).capitalize().replace(" ", "").replace("r.", "").replace("‎", ""))
+        year_val = int(str(year).replace(" ", "").replace("r.", "").replace("‎", ""))
         if year_val < min_year or year_val > max_year:
             year_score = 0
         else:
             year_score = max(0, 35 - int(((max_year - year_val) / (max_year - min_year)) * 35))
-    except Exception:
+    except Exception as e:
+        print(f"[!] Exception Occurred: {e}")
         year_score = 0
     points += year_score
 
     # engine_hp pointing
     try:
-        engine_hp_val = int(str(engine_hp).capitalize().replace(" ", "").replace("KM", "").replace("‎", ""))
+        engine_hp_val = int(str(engine_hp).replace(" ", "").replace("KM", "").replace("‎", ""))
         # okay so for the engine horsepower, i have no idea how to make it dynamically calculate it so it will just remain like this
         min_engine_hp = 105
         max_engine_hp = 310
@@ -101,8 +103,11 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
             engine_hp_score = 0
         else:
             engine_hp_score = max(0, int(((engine_hp_val - min_engine_hp) / (max_engine_hp - min_engine_hp)) * 15))
-    except Exception:
+    except Exception as e:
+        print(f"[!] Exception Occurred: {e}")
         engine_hp_score = 0
     points += engine_hp_score
+
+    
 
     return points

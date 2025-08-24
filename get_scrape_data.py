@@ -1,5 +1,6 @@
 from shared import articles, headers, link_to_look, random, requests, BeautifulSoup
 from point_calculator import calculate_points
+import re
 
 def getscrapingdata(pages):
     for page in range(1, pages + 1):
@@ -21,21 +22,29 @@ def getscrapingdata(pages):
             price = article.find("h3", class_="efzkujb1 ooa-1qiba3v")
             title = article.find("h2", class_="etydmma0 ooa-iasyan")
             link = article.find("a")
-
             extra_data = article.find("p", class_="e1afgq2j0 ooa-pr7t48")
             engine_l = engine_hp = extra_data_text = ""
+            
             if extra_data is not None:
                 extra_data_text = extra_data.text.strip()
                 parts = [part.strip() for part in extra_data_text.split("•")]
                 engine_l = parts[0] if len(parts) > 0 else ""
                 engine_hp = parts[1] if len(parts) > 1 else ""
                 extra_data_text = parts[2] if len(parts) > 2 else ""
+                
 
             if mileage and price and fuel_type and gearbox and year: #after all data is collected
+                
+                # Mileage fix for mileages that aren't in thousands (example: 500 km -> 500 000 km)
+                mileage_val = int(str(mileage.text.strip()).capitalize().replace(" ", "").replace("km", ""))
+                mileage = mileage.text.strip()
+                if mileage_val < 1000:
+                    mileage = mileage.replace(" km", " 000 km")
+
                 # Calculate points based on the collected data
                 # Refer to point_calculator.py for the calculate_points function
                 points = calculate_points(
-                    mileage.text.strip(),
+                    mileage,
                     price.text.strip(),
                     fuel_type.text.strip(),
                     gearbox.text.strip(),
@@ -43,9 +52,11 @@ def getscrapingdata(pages):
                     engine_hp
                 )
 
-                #prepare data for extraction for csv by appending the array
-                mileage_value = mileage.text.strip().replace(" ", "‎ ")
+                # Prepare data for extraction for csv by appending the array
+                mileage_value = mileage.replace(" ", "‎ ")
                 price_value = price.text.strip() + "zł"
+
+
                 articles.append([
                     points,
                     mileage_value,

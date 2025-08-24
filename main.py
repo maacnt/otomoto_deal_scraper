@@ -37,7 +37,9 @@ def main():
     print("[:] Found total articles:", total_articles)
 
     should_be_pages = math.ceil(int(total_articles) / 32)
-    pages = soup.find("li", class_="ooa-6ysn8b").text
+    pages = 1
+    if soup.find("li", class_="ooa-6ysn8b"):
+        pages = soup.find("li", class_="ooa-6ysn8b").text
 
     if (pages != should_be_pages):
         print("[!] Page count mismatch between scraped from website and calculated from the amount of results:", pages, "!=", should_be_pages)
