@@ -4,22 +4,20 @@ from bs4 import BeautifulSoup
 import csv
 import random
 from get_scrape_data import getscrapingdata
-from shared import headers,link_to_look,articles
+from shared import headers,link_to_look,articles,include_damaged_vehicles,damaged_articles
+import shared
+from filter_articles import filter_articles
+from debug_print import debug_print
+from data_from_link import change_damaged_vehicles_param
 
-header = headers[random.randint(0, len(headers) - 1)]
-request = requests.get(link_to_look, headers={"User-Agent": header})
-print("Sending the request...")
 
+def send_request():
+    from shared import link_to_look
+    header = headers[random.randint(0, len(headers) - 1)]
+    request = requests.get(shared.link_to_look, headers={"User-Agent": header})
+    print("Sending the request...")
+    
 
-def write_to_csv(articles):
-    print("Data Scraped\nWriting to CSV...")
-    with open("output.csv", "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["Scored Points", "Mileage", "Price", "Fuel Type", "Gearbox", "Year", "Engine L", "Engine HP", "Extra Data", "Title Offer", "Link"])
-        for row in articles:
-            writer.writerow(row)
-
-def main():
     if (request.status_code != 200):
         print("================ [!] Cannot access website [!] ================")
         print("If you see this error, please check your internet connection (turning off your VPN if you have one) or check the website status.")
@@ -52,17 +50,64 @@ def main():
     else:
         print("[:] Found pages:", pages)
 
+    return pages
+
+def write_to_csv(articles):
+    print("[:] Data Scraped\n[:] Writing to CSV...")
+    with open("output.csv", "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["Scored Points", "Mileage", "Price", "Fuel Type", "Gearbox", "Year", "Engine L", "Engine HP", "Extra Data", "Title Offer", "Link"])
+        for row in articles:
+            writer.writerow(row)
+
+def main():
+    from shared import link_to_look
+    pages = send_request()
+    
+    if pages is None:
+        print("[!] Failed to retrieve pages")
+        debug_print("[DEBUG] Pages is None!!!!!")
+        return
+    
     global articles
     articles.clear()
     print("Scraping articles...")
 
+    
+
     # Get all articles and put them into array (refer to get_scraping_data for code)
-    getscrapingdata(pages)
+    getscrapingdata(pages, False, shared.link_to_look)
+
+    if articles is None:
+        print("[!] Failed to retrieve articles")
+        debug_print("[DEBUG] Articles is None!!!!!")
+        return
+
+    debug_print(f"[DEBUG] include_damaged_vehicles: {shared.include_damaged_vehicles}")
+    if shared.include_damaged_vehicles:
+        print("[:] Reenacting scraping process for damaged vehicles (they will be included with [D]). If you do not wish to include them, set your filters to undamaged only")
+        shared.link_to_look = change_damaged_vehicles_param(shared.link_to_look, "1")
+        pages = send_request()
+        getscrapingdata(pages, True, shared.link_to_look)
+
+        if pages is None:
+            print("[!] Failed to retrieve pages")
+            debug_print("[DEBUG] Pages is None!!!!!")
+            return
+        
+        print("[:] Second scraping done...")
+
+    # Filter articles
+    debug_print(f"[DEBUG] Filtering articles in main {len(articles)} of articles and {len(damaged_articles)} damaged articles")
+    articles = filter_articles(articles,damaged_articles)
+    debug_print(f"[DEBUG] Filtered articles in main: {len(articles)}")
 
     # Write articles array to CSV
+    debug_print("[DEBUG] Writing articles to CSV")
     write_to_csv(articles)
 
     print("================ Scraping completed. check output.csv for results ================")
+
 
 if __name__ == "__main__":
     main()

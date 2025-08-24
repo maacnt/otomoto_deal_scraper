@@ -1,8 +1,13 @@
-from shared import articles, headers, link_to_look, random, requests, BeautifulSoup
+from shared import articles, headers, random, requests, BeautifulSoup, debug_mode, damaged_articles
 from point_calculator import calculate_points
-import re
 
-def getscrapingdata(pages):
+def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
+    from debug_print import debug_print
+    
+    if debug_mode and True: # Change to False if you still want to look through all pages
+        pages = 2
+        
+    debug_print(f"[DEBUG] Received link as {link_to_look}")
     for page in range(1, pages + 1):
         print(f"Scraping page {page}...")
         if page == 1:
@@ -56,19 +61,33 @@ def getscrapingdata(pages):
                 mileage_value = mileage.replace(" ", "‎ ")
                 price_value = price.text.strip() + "zł"
 
+                if not include_damaged_vehicles:
+                    articles.append([
+                        points,
+                        mileage_value,
+                        price_value,
+                        fuel_type.text.strip(),
+                        gearbox.text.strip(),
+                        year.text.strip(),
+                        engine_l,
+                        engine_hp,
+                        extra_data_text,
+                        title.text.strip(),
+                        link["href"] if link else ""
+                    ])
+                else:
+                    damaged_articles.append([
+                        points,
+                        mileage_value,
+                        price_value,
+                        fuel_type.text.strip(),
+                        gearbox.text.strip(),
+                        year.text.strip(),
+                        engine_l,
+                        engine_hp,
+                        extra_data_text,
+                        "[D]! " + title.text.strip(),
+                        link["href"] if link else ""
+                    ])
 
-                articles.append([
-                    points,
-                    mileage_value,
-                    price_value,
-                    fuel_type.text.strip(),
-                    gearbox.text.strip(),
-                    year.text.strip(),
-                    engine_l,
-                    engine_hp,
-                    extra_data_text,
-                    title.text.strip(),
-                    link["href"] if link else ""
-                ])
-
-    return articles
+    return
