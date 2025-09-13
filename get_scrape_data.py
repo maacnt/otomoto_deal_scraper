@@ -4,7 +4,7 @@ from point_calculator import calculate_points
 def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
     from debug_print import debug_print
     
-    if debug_mode and True: # Change to False if you still want to look through all pages
+    if debug_mode and False: # Change to False if you still want to look through all pages
         pages = 2
         
     debug_print(f"[DEBUG] Received link as {link_to_look}")
@@ -24,10 +24,10 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
             fuel_type = article.find("dd", {"data-parameter": "fuel_type"})
             gearbox = article.find("dd", {"data-parameter": "gearbox"})
             year = article.find("dd", {"data-parameter": "year"})
-            price = article.find("h3", class_="efzkujb1 ooa-1qiba3v")
-            title = article.find("h2", class_="etydmma0 ooa-iasyan")
+            price = article.find("h3", class_="efzkujb1")
+            title = article.find("h2", class_="etydmma0")
             link = article.find("a")
-            extra_data = article.find("p", class_="e1afgq2j0 ooa-pr7t48")
+            extra_data = article.find("p", class_="e1afgq2j0")
             engine_l = engine_hp = extra_data_text = ""
             
             if extra_data is not None:
