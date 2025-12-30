@@ -24,10 +24,10 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
             fuel_type = article.find("dd", {"data-parameter": "fuel_type"})
             gearbox = article.find("dd", {"data-parameter": "gearbox"})
             year = article.find("dd", {"data-parameter": "year"})
-            price = article.find("h3", class_="efzkujb1")
-            title = article.find("h2", class_="etydmma0")
+            price = article.find("h3", class_="eg88ra81")
+            title = article.find("h2", class_="e123dwbo0")
             link = article.find("a")
-            extra_data = article.find("p", class_="e1afgq2j0")
+            extra_data = article.find("p", class_="e1kj25my0")
             engine_l = engine_hp = extra_data_text = ""
             
             if extra_data is not None:
