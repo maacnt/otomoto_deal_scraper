@@ -84,6 +84,8 @@ The program after completing the scraping process will create a <b>output.csv</b
 
 # Misc.
 
+I am going to keep updating this every so often when i see that it got broken
+
 You can set a static link in shared.py at line 9 file in case of needing to run the program multiple times
 
 If the website would change its structure the program will <i>likely break</i>. i will try to maintain the code as long as i will need this program
