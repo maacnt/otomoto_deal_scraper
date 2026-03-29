@@ -31,7 +31,10 @@ def send_request():
     soup = BeautifulSoup(request.text, "html.parser")
     print("Website loaded")
 
-    total_articles = soup.find("b").text
+    #total_articles = soup.find("b").text # they had to change it :skull:
+    total_articles = soup.find("p", class_="ooa-1h4mewe").text
+    total_articles = [int(s) for s in total_articles.split() if s.isdigit()]
+    total_articles = sum(total_articles)
     print("[:] Found total articles:", total_articles)
 
     should_be_pages = math.ceil(int(total_articles) / 32)
