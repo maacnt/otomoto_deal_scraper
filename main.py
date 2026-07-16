@@ -1,14 +1,19 @@
+# LIB IMPORT
 import math
 import requests
 from bs4 import BeautifulSoup
-import csv
 import random
-from get_scrape_data import getscrapingdata
-from shared import headers,link_to_look,articles,include_damaged_vehicles,damaged_articles
+import webbrowser
+import os
+
+# FILE IMPORT
 import shared
+from get_scrape_data import getscrapingdata
+from shared import headers,link_to_look,articles,include_damaged_vehicles,damaged_articles,use_csv_instead
 from filter_articles import filter_articles
 from debug_print import debug_print
 from data_from_link import change_damaged_vehicles_param
+from write_to_output import write_to_js,write_to_csv
 
 
 def send_request():
@@ -55,14 +60,6 @@ def send_request():
 
     return pages
 
-def write_to_csv(articles):
-    print("[:] Data Scraped\n[:] Writing to CSV...")
-    with open("output.csv", "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["Scored Points", "Mileage", "Price", "Fuel Type", "Gearbox", "Year", "Engine L", "Engine HP", "Extra Data", "Title Offer", "Link"])
-        for row in articles:
-            writer.writerow(row)
-
 def main():
     from shared import link_to_look
     pages = send_request()
@@ -104,12 +101,22 @@ def main():
     debug_print(f"[DEBUG] Filtering articles in main {len(articles)} of articles and {len(damaged_articles)} damaged articles")
     articles = filter_articles(articles,damaged_articles)
     debug_print(f"[DEBUG] Filtered articles in main: {len(articles)}")
-
+    
     # Write articles array to CSV
-    debug_print("[DEBUG] Writing articles to CSV")
-    write_to_csv(articles)
+    if not use_csv_instead:
+        debug_print("[DEBUG] Writing articles to .js file")
+        write_to_js(articles)
+
+    if use_csv_instead:
+        debug_print("[DEBUG] Writing articles to CSV")
+        write_to_csv(articles)
 
     print("================ Scraping completed. check output.csv for results ================")
+    
+    # Open the website for viewing
+    if not use_csv_instead:
+        html_file_path = os.path.abspath("website/index.html")
+        webbrowser.open(f"file://{html_file_path}")
 
 
 if __name__ == "__main__":

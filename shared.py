@@ -6,7 +6,9 @@ import re
 from data_from_link import data_from_link
 
 
-link_to_look = ""
+link_to_look = "" # Pre-define a link for scraping so that the program wouldn't ask for a link every time it got launched
+use_csv_instead = False # Set to True to use CSV export instead of using the website to view the offers scraped
+
 
 debug_mode = False # will scan only 2 pages and will print out extra information
 debug_mode_rating = False # will print out extra information for rating calculations (CAN SPAM OUT THE CONSOLE). Doesn't need debug_mode to be on to work
@@ -17,7 +19,7 @@ debug_mode_rating = False # will print out extra information for rating calculat
 
 include_damaged_vehicles = False # DO NOT CHANGE!!!!!!! if you don't want crashed vehicles to be included just change it in the filters on the site
 # the variable is for only when you do not have a filter for damaged/undamaged vehicles and will look for both undamaged and damaged vehicles
-# separately to rank them appropriately in the CSV file, changing the variable to true will break the script (most likely)
+# separately to rank them appropriately in the CSV file/website, changing the variable to true will break the script (most likely)
 
 if link_to_look == "":
     print("==================================================")

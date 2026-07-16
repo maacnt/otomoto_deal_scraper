@@ -1,4 +1,4 @@
-from shared import articles, headers, random, requests, BeautifulSoup, debug_mode, damaged_articles
+from shared import articles, headers, random, requests, BeautifulSoup, debug_mode, damaged_articles, use_csv_instead
 from point_calculator import calculate_points
 
 def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
@@ -29,7 +29,8 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
             link = article.find("a")
             extra_data = article.find("p", class_="e1kj25my0")
             engine_l = engine_hp = extra_data_text = ""
-            
+            car_image = article.find("img")["src"] if article.find("img") else ""
+
             if extra_data is not None:
                 extra_data_text = extra_data.text.strip()
                 parts = [part.strip() for part in extra_data_text.split("•")]
@@ -61,6 +62,11 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
                 mileage_value = mileage.replace(" ", "‎ ")
                 price_value = price.text.strip() + "zł"
 
+                # Remove car image for CSV export
+                if use_csv_instead:
+                    car_image = None
+        
+
                 if not include_damaged_vehicles:
                     articles.append([
                         points,
@@ -73,7 +79,8 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
                         engine_hp,
                         extra_data_text,
                         title.text.strip(),
-                        link["href"] if link else ""
+                        link["href"] if link else "",
+                        car_image
                     ])
                 else:
                     damaged_articles.append([
@@ -87,7 +94,8 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
                         engine_hp,
                         extra_data_text,
                         "[D]! " + title.text.strip(),
-                        link["href"] if link else ""
+                        link["href"] if link else "",
+                        car_image
                     ])
 
     return

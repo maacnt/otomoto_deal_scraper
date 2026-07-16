@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otomoto deal scraper</title>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary-blue: #2563eb;
+            --primary-blue-hover: #1d4ed8;
+            
+            /* Score Badge Colors */
+            --score-supreme: #7e22ce;
+            --score-high: #10b981;
+            --score-mid: #f59e0b;
+            --score-low: #ef4444;
+            
+            /* Damaged Tag Colors */
+            --damaged-bg: #fef2f2;
+            --damaged-text: #b91c1c;
+            --damaged-border: #fee2e2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 40px 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -0.025em;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-size: 15px;
+        }
+
+        /* Responsive Grid Setup */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* Card Styling */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Image Wrapper with fixed aspect ratio */
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background-color: #e2e8f0;
+        }
+
+        .car-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Score Badge Positioned Over Image */
+        .score-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            letter-spacing: 0.05em;
+            z-index: 2;
+        }
+
+        /* Card Content Area */
+        .card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .damaged-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--damaged-bg);
+            color: var(--damaged-text);
+            border: 1px solid var(--damaged-border);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            width: fit-content;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .extra-data {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 40px; /* Forces consistent height across cards */
+        }
+
+        /* Specifications Section */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .spec-item {
+            color: #475569;
+        }
+
+        .spec-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 1px;
+        }
+
+        /* Price & Button Footer */
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .price-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .price-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            background: var(--primary-blue);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-blue-hover);
+        }
+
+        /* Error Box Layout */
+        .error-box {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #feb2b2;
+            text-align: center;
+            max-width: 600px;
+            margin: 40px auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+
+        .error-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Otomoto Deal Scraper</h1>
+    </header>
+    
+    <div id="errorBox" class="error-box">
+        <div class="error-title">⚠️ Data File Not Detected!</div>
+        <p style="font-size: 14px; color: #9b2c2c;">
+            Did you run the <code>main.py</code>?<br>
+            This usually happens when <code>main.py</code> has not been run successfully.<br>
+            Could not find the <code>output.js</code> file, or the array <code>articles</code> is empty.<br>
+        </p>
+    </div>
+
+    <!-- Main Grid UI -->
+    <div id="carsGrid" class="grid">
+        <!-- JS generates cards here -->
+    </div>
+</div>
+
+<script src="../output.js"></script>
+
+<script>
+    // Fallback Image generator if a car image fails to load
+    const fallbackImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'><rect width='320' height='240' fill='%23cbd5e1'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%2364748b'>No Image Available</text></svg>";
+
+    function loadData() {
+        try {
+            // Check if 'articles' array exists in output.js
+            if (typeof articles === 'undefined' || !Array.isArray(articles) || articles.length === 0) {
+                throw new Error("articles array not defined or empty.");
+            }
+
+            // Always sort highest scoredPoints -> lowest
+            const sortedArticles = [...articles].sort((a, b) => b.scoredPoints - a.scoredPoints);
+
+            document.getElementById('errorBox').style.display = 'none';
+            renderGrid(sortedArticles);
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('errorBox').style.display = 'block';
+            document.getElementById('carsGrid').style.display = 'none';
+        }
+    }
+
+    function renderGrid(items) {
+        const grid = document.getElementById('carsGrid');
+        grid.innerHTML = '';
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            // Dynamically color-code based on score limits
+            let scoreColor = 'var(--score-low)';
+            if (item.scoredPoints >= 160) {
+                scoreColor = 'var(--score-supreme)';
+            } else if (item.scoredPoints >= 100) {
+                scoreColor = 'var(--score-high)';
+            } else if (item.scoredPoints >= 70) {
+                scoreColor = 'var(--score-mid)';
+            }
+
+            // Identify and isolate "[D]!" tags (marking as damaged)
+            let isDamaged = false;
+            let displayTitle = item.titleOffer || "No Title";
+            if (displayTitle.includes('[D]!')) {
+                isDamaged = true;
+                displayTitle = displayTitle.replace('[D]!', '').trim();
+            }
+
+            card.innerHTML = `
+                <div class="image-container">
+                    <div class="score-badge" style="background-color: ${scoreColor}">
+                        ${item.scoredPoints} PTS
+                    </div>
+                    <img 
+                        src="${item.carImage || fallbackImage}" 
+                        alt="${displayTitle}" 
+                        class="car-image"
+                        onerror="this.onerror=null; this.src=fallbackImage;"
+                    />
+                </div>
+                <div class="card-content">
+                    ${isDamaged ? '<div class="damaged-badge">⚠ Damaged</div>' : ''}
+                    <h3 class="title">${displayTitle}</h3>
+                    <p class="extra-data">${item.extraData || ''}</p>
+                    
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <div class="spec-label">Year</div>
+                            <div>${item.year || 'N/A'}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Mileage</div>
+                            <div>${item.mileage || 'N/A'}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Engine</div>
+                            <div>${item.engineL || 'N/A'}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Power / Fuel</div>
+                            <div>${item.engineHP || 'N/A'} • ${item.fuelType || ''}</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="price-container">
+                            <span class="price-label">Price</span>
+                            <span class="price-value">${item.price}</span>
+                        </div>
+                        <a href="${item.link}" target="_blank" class="btn">Open offer</a>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Run dashboard initialization on page load
+    window.addEventListener('DOMContentLoaded', loadData);
+</script>
+</body>
+</html>
