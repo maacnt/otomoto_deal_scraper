@@ -72,12 +72,15 @@ python3 main.py
 
 5. Paste the link into the terminal with the set filters 
 
-The program after completing the scraping process will create a <b>output.csv</b> file with all the cars in the current directory.
+## <i><b>To view the scraped data again, go into the website folder and open index.html!!!</b></i>
 
-<b> If the filter for undamaged/damaged cars was not set, the program will mark them in output.csv file with a "[D]! in front of the title offer"</b>
 
-<b>NOTE:</b> The output file will be overwritten each time the program is run. Create copies if you want to keep the results.
 
+~~The program after completing the scraping process will create a <b>output.csv</b> file with all the cars in the current directory.~~
+
+~~<b> If the filter for undamaged/damaged cars was not set, the program will mark them in output.csv file with a "[D]! in front of the title offer"</b>~~
+
+~~<b>NOTE:</b> The output file will be overwritten each time the program is run. Create copies if you want to keep the results.~~
 
 
 
