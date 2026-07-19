@@ -1,4 +1,6 @@
-from shared import articles, headers, random, requests, BeautifulSoup, debug_mode, damaged_articles, use_csv_instead
+from bs4 import BeautifulSoup # type: ignore 
+# for some reason i have to ignore the import error for bs4 /shrug 
+from shared import articles, headers, random, requests, debug_mode, damaged_articles, use_csv_instead
 from point_calculator import calculate_points
 
 def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
@@ -49,14 +51,17 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
 
                 # Calculate points based on the collected data
                 # Refer to point_calculator.py for the calculate_points function
-                points = calculate_points(
-                    mileage,
-                    price.text.strip(),
-                    fuel_type.text.strip(),
-                    gearbox.text.strip(),
-                    year.text.strip(),
-                    engine_hp
-                )
+
+                points = "N/A" # Points are going to get calculated now AFTER all the articles got collected to get dynamic range of data for rating
+
+                #points = calculate_points(
+                #    mileage,
+                #    price.text.strip(),
+                #    fuel_type.text.strip(),
+                #    gearbox.text.strip(),
+                #    year.text.strip(),
+                #    engine_hp
+                #)
 
                 # Prepare data for extraction for csv by appending the array
                 mileage_value = mileage.replace(" ", "‎ ")

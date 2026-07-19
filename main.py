@@ -1,7 +1,8 @@
 # LIB IMPORT
 import math
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup # type: ignore
+# for some reason i have to ignore the import error for bs4 /shrug 
 import random
 import webbrowser
 import os
@@ -14,21 +15,26 @@ from filter_articles import filter_articles
 from debug_print import debug_print
 from data_from_link import change_damaged_vehicles_param
 from write_to_output import write_to_js,write_to_csv
-
+from get_ranges_from_articles import get_ranges
+from point_calculator import calculate_article_points
 
 def send_request():
     from shared import link_to_look
-    header = headers[random.randint(0, len(headers) - 1)]
-    request = requests.get(shared.link_to_look, headers={"User-Agent": header})
     print("Sending the request...")
-    
+    try:
+        header = headers[random.randint(0, len(headers) - 1)]
+        request = requests.get(shared.link_to_look, headers={"User-Agent": header})
+    except Exception as e:
+        print("\n\n\n\n\n[!] An error occured with the provided link, double check if it's correct and if continues create an issue on the github repo")
+        debug_print("[DEBUG] Exception occurred while sending request:", e)
+        return
 
     if (request.status_code != 200):
         print("================ [!] Cannot access website [!] ================")
         print("If you see this error, please check your internet connection (turning off your VPN if you have one) or check the website status.")
         print("If the issue persists, try changing the headers in shared.py file")
         print("The link might be invalid or might have changed")
-        print("If all all the above steps fail, try using a minimalistic scraping script to debug the issue.")
+        print("If all all the above steps fail, create an issue on github and i'll look into it")
         return
     print("================ Request successful =================")
 
@@ -96,6 +102,13 @@ def main():
             return
         
         print("[:] Second scraping done...")
+
+    # Get dynamic ranges for pointing and then go and point every vehicle
+    dynamic_variables = [min_hp := 0, max_hp := 0, min_year := 0, max_year := 0]
+    dynamic_variables = get_ranges(articles, damaged_articles)
+    
+    # Calculate points with dynamic ranges
+    calculate_article_points(articles, damaged_articles, *dynamic_variables)
 
     # Filter articles
     debug_print(f"[DEBUG] Filtering articles in main {len(articles)} of articles and {len(damaged_articles)} damaged articles")

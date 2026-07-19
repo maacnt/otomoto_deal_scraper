@@ -1,16 +1,16 @@
 import random
 import requests
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 import re
 from data_from_link import data_from_link
+
 
 
 link_to_look = "" # Pre-define a link for scraping so that the program wouldn't ask for a link every time it got launched
 use_csv_instead = False # Set to True to use CSV export instead of using the website to view the offers scraped
 
 
-debug_mode = False # will scan only 2 pages and will print out extra information
+debug_mode = False # will scan only 2 pages (if in get_scrape_data.py on line 7 variable is set to True) and will print out extra information
 debug_mode_rating = False # will print out extra information for rating calculations (CAN SPAM OUT THE CONSOLE). Doesn't need debug_mode to be on to work
 
 

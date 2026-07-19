@@ -1,7 +1,6 @@
 from debug_print import debug_rating_print
 from shared import data
 
-
 year_from = data.get("year_from")
 year_to = data.get("year_to")
 price_from = data.get("price_from")
@@ -15,18 +14,10 @@ if (mileage_to is None):
     print("[!] No max Mileage filter set for ranking, assuming max for 350000, change it for your use case (NOTE FOR DEFAULT MILEAGE: It will still Rank cars with higher mileage, but anything past 350000 will have 0 points for mileage)")
     mileage_to = 350000
 if (year_to is None):
-    print("[!] No max Year filter set for ranking, assuming max for 2025, change it for your use case")
-    year_to = 2025
+    print("[!] No max Year filter set for ranking, assuming newest year found in results to be the highest ranked one")
+    year_to = 2026
 if (year_from is None):
-    if year_to is not None:
-        print("[!] No min Year filter set for ranking, assuming min -10 years of max year, change it for your use case")
-        year_from = year_to - 10
-    else:
-        print("[!] No min Year filter set for ranking, assuming min for 1998, change it for your use case")
-        year_from = 1998
-elif (year_from is None and year_to is not None):
-    print("[!] No min Year filter set for ranking, assuming min -15 years of max year, change it for your use case")
-    year_from = year_to - 15
+    print("[!] No min Year filter set for ranking, assuming oldest year found in results to be the lowest ranked one")
 if (price_to is None):
     print("[!] No max Price filter set for ranking, assuming max for 30000, change it for your use case (NOTE FOR DEFAULT PRICE: It will still Rank cars with higher price, but anything past 30000 will have 0 points)")
     price_to = 30000
@@ -37,7 +28,23 @@ if (mileage_from is None):
     print("[!] No min Mileage filter set for ranking, assuming min for 0, change it for your use case")
     mileage_from = 0
 
-def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
+def calculate_article_points(articles, damaged_articles, min_hp, max_hp, min_year, max_year):
+
+    combined_articles = articles + damaged_articles
+    for article in combined_articles:
+        points = calculate_points(
+            mileage=article[1],
+            price=article[2],
+            fuel_type=article[3],
+            gearbox=article[4],
+            year=article[5],
+            engine_hp=article[7],
+            min_hp=min_hp, max_hp=max_hp, year_from=min_year, year_to=max_year
+        )
+        debug_rating_print("[RATING DEBUG] article0 ", article[0], " meant to points:", points)
+        article[0] = points
+
+def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp, min_hp, max_hp, year_from, year_to):
     points = 0
 
     # mileage pointing
@@ -53,6 +60,7 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
         print(f"[!] Exception Occurred: {e}")
         mileage_score = 0
 
+    
     debug_rating_print("[RATING DEBUG] Mileage:", mileage, "->", mileage_val, "points:", mileage_score)
     points += mileage_score
     
@@ -74,6 +82,7 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
     debug_rating_print("[RATING DEBUG] Price:", price, "->", price_val, "points:", price_score)
     points += price_score
 
+    # i'll have to change that soon... -- mac@2:55AM
     if (fuel_type == "Diesel"):
         points += 15
         debug_rating_print("[RATING DEBUG] Fuel Type: Diesel -> points:", 15)
@@ -93,6 +102,7 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
     elif (gearbox == "Automatyczna"):
         points += 2
         debug_rating_print("[RATING DEBUG] Gearbox: Automatyczna -> points:", 2)
+        
 
     max_year = int(str(year_to).replace(" ", "").replace("r.", "").replace("‎", ""))
     min_year = int(str(year_from).replace(" ", "").replace("r.", "").replace("‎", ""))
@@ -111,10 +121,15 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp):
 
     # engine_hp pointing
     try:
-        engine_hp_val = int(str(engine_hp).replace(" ", "").replace("KM", "").replace("‎", ""))
-        # okay so for the engine horsepower, i have no idea how to make it dynamically calculate min and max so it will just remain like this
-        min_engine_hp = 105
-        max_engine_hp = 310
+        engine_hp_val = int(str(engine_hp).replace(" ", "").replace("KM", "").replace("‎", "").replace("cm3", ""))
+
+        if not min_hp or not max_hp:
+            min_engine_hp = 105
+            max_engine_hp = 310
+        else:
+            min_engine_hp = min_hp
+            max_engine_hp = max_hp
+            
         if engine_hp_val < min_engine_hp or engine_hp_val > max_engine_hp:
             engine_hp_score = 0
         else:
