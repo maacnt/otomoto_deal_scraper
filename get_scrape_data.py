@@ -70,7 +70,12 @@ def getscrapingdata(pages, include_damaged_vehicles, link_to_look):
                 # Remove car image for CSV export
                 if use_csv_instead:
                     car_image = None
-        
+
+                # Fix for when the offer doesn't have hp information
+                
+                if (extra_data_text == "" or extra_data_text == None) and engine_hp.find("KM") == -1:
+                    extra_data_text = engine_hp
+                    engine_hp = None
 
                 if not include_damaged_vehicles:
                     articles.append([

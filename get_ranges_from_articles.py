@@ -34,7 +34,10 @@ def get_ranges(articles, damaged_articles):
             continue
 
         year = int(article[5])
-        hp = int(article[7].split()[0])  # change "150 KM" -> 150
+        if article[7] is not None:
+            hp = int(article[7].split()[0])  # change "150 KM" -> 150
+        else:
+            continue
 
         min_year = min(min_year, year)
         max_year = max(max_year, year)

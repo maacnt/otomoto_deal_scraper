@@ -121,7 +121,10 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp, min_hp
 
     # engine_hp pointing
     try:
-        engine_hp_val = int(str(engine_hp).replace(" ", "").replace("KM", "").replace("‎", "").replace("cm3", ""))
+        if engine_hp:
+            engine_hp_val = int(str(engine_hp).replace(" ", "").replace("KM", "").replace("‎", "").replace("cm3", ""))
+        else:
+            engine_hp_val = 0
 
         if not min_hp or not max_hp:
             min_engine_hp = 105
@@ -134,10 +137,10 @@ def calculate_points(mileage, price, fuel_type, gearbox, year, engine_hp, min_hp
             engine_hp_score = 0
         else:
             engine_hp_score = max(0, int(((engine_hp_val - min_engine_hp) / (max_engine_hp - min_engine_hp)) * 15))
+        debug_rating_print("[RATING DEBUG] Engine HP:", engine_hp, "->", engine_hp_val, "points:", engine_hp_score)
     except Exception as e:
         print(f"[!] Exception Occurred: {e}")
         engine_hp_score = 0
-    debug_rating_print("[RATING DEBUG] Engine HP:", engine_hp, "->", engine_hp_val, "points:", engine_hp_score)
     points += engine_hp_score
 
     debug_rating_print("[RATING DEBUG] Total Points:", points)

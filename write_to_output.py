@@ -13,9 +13,11 @@ def write_to_js(articles):
     with open("output.js", "w", encoding="utf-8") as jsfile:
         jsfile.write("const articles = [\n")
         for row in articles:
-            # remove '' from all string values (breaks the website if someone decides to add it)
-            if isinstance(row, str):
-                row = [value.strip("'") for value in row]
+            # remove ' from all string values (breaks the website if someone decides to add it)
+            row = [
+            value.replace("'", "") if isinstance(value, str) else value
+            for value in row
+            ]
 
             jsfile.write("    {\n")
             jsfile.write(f"        scoredPoints: {row[0]},\n")
